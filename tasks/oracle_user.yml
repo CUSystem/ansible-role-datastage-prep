@@ -1,0 +1,36 @@
+
+- name: create {{ oracle_group }} group
+  group:
+    name: "{{ oracle_group }}"
+    state: present
+
+- name: Create {{ oracle_user }} user
+  user:
+    name: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+- name: set PAM limits for Oracle
+  pam_limits:
+    domain:     "{{ item.domain }}"
+    value:      "{{ item.value }}"
+    limit_type: "{{ item.limit_type }}"
+    limit_item: "{{ item.limit_item }}"
+  with_items: "{{ oracle_pam_limits_values }}"
+  when: oracle_pam_limits_change 
+
+- name: Create a shell profile with file and process limits for oracle user
+  template:
+    src: limits.sh.j2
+    dest: /etc/profile.d/limits.sh
+    owner: root
+    mode: 0644
+  when: oracle_pam_limits_change 
+
+- name: Create oracle base
+  file:
+    path: "{{ oracle_base }}"
+    state: directory
+    owner: "{{ oracle_user }}"
+    group: "{{ oracle_group }}"
+
+

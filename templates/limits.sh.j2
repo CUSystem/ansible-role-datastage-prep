@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ $USER = "{{ oracle_user }}" ]; then
+  if [ $SHELL = "/bin/ksh" ]; then
+    ulimit -p {{ oracle_hard_nproc }}
+    ulimit -n {{ oracle_hard_no_file }}
+  else
+    ulimit -u {{ oracle_hard_nproc }} -n {{ oracle_hard_no_file }}
+  fi
+fi

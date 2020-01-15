@@ -1,0 +1,65 @@
+# Ansible Role: datastage-prep
+
+Forked role from staylorx/ansible-role-wls-prep
+
+Setup O/S configuration to support an installation of DataStage 
+
+The default option installs Oracle JDBC Client.  The client binary is downloaded via URL
+
+This can be overriden with the 'install_oracle_client' variable
+
+## Required Variables
+dsadm_pass # The DataStage user password, place in vault
+
+Required with the Oracle Install:
+
+oracle_client_installer_url: #e.g. http://artifactory.<your_domain>/<path_to>/<install_archive>
+
+You may wish or need to set the installer extract directory and path to the installer:
+
+install_dir: /tmp/dbclient
+run_installer: /client/runInstaller
+
+## Requirements
+
+Linux, RHEL or CentOS 7 preferred but 6 supported.
+
+## Dependencies
+
+None.
+
+== Example requirements.yml
+
+----
+- src: https://github.com/CUSystem/ansible-role-datastage-prep.git
+  version: master
+  name: cusystem.ansible-role-datastage-prep
+
+----
+
+Install with
+
+  sudo ansible-galaxy install -r requirements.yml
+
+
+
+## Example Playbook
+
+----
+  - hosts: servers
+    vars:
+      kernel_change: yes
+      pam_limits_change: yes
+      dsadm_pass: changeit
+      install_dir: /tmp/dbclient
+      run_installer: /client/runInstaller
+      oracle_client_installer_url: http://artifactory.<your_domain>/<path_to>/oraclient12.2.0.1_x86.zip
+    roles:
+    - { role: CUSystem.datastage-prep }
+----
+
+Set 'kernel_change' and 'pam_limits_change' to no for use in containers.
+
+## License
+
+MIT

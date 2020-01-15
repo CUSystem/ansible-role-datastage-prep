@@ -1,0 +1,45 @@
+- name: remove existing oracle client install
+  file:
+    path: "{{ oracle_home }}"
+    state: absent
+
+- name: remove existing oracle client install
+  file:
+    path: "{{ inventory_location }}"
+    state: absent
+
+- name: template silent install response
+  template:
+    src: templates/client.rsp.j2
+    dest: /tmp/client.rsp
+    mode: 0600
+
+- name: create temp dir
+  file:
+    path: "{{ install_dir }}"
+    state: directory
+
+- name: unarchive
+  unarchive:
+    src: "{{ oracle_client_installer_url }}"
+    remote_src: yes
+    dest: "{{ install_dir }}" 
+
+- name: run installer
+  shell: "{{ install_dir }}/{{ run_installer }} -silent -noconfig -skipPrereqs -waitForCompletion -responseFile /tmp/client.rsp"
+
+# For now mounting NFS with tnsnames.ora
+#
+#- name: Template tnsnames.ora
+#  template:
+#    src: templates/tnsnames.ora.j2
+#    dest: "{{ oracle_home }}/network/admin/tnsnames.ora"
+#    mode: 0664
+
+- name: cleanup
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ install_dir }}"
+    - /tmp/client.rsp

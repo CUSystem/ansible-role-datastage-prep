@@ -1,0 +1,16 @@
+---
+dependencies: []
+
+galaxy_info:
+  author: jshure, forked from staylorx 
+  description: Datastage O/S Prepare
+  license: "license (MIT)"
+  min_ansible_version: 1.4
+  platforms:
+  - name: EL
+    versions:
+    - 6
+    - 7
+  categories:
+    - development
+    - system

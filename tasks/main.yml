@@ -1,0 +1,86 @@
+# Tasks for wlsprep role.
+
+# ==> Configure Linux
+- name: Install required libraries
+  yum: 
+    name: "{{ item }}" 
+    state: latest
+  with_items: "{{ package_list }}"
+
+
+- name: Check SELinux status
+  shell: selinuxenabled && echo enabled || echo disabled
+  register: selinux_status
+
+- name: Disable SELinux
+  selinux: 
+    state: disabled
+  when: selinux_status.stdout != 'disabled'
+
+- name: Disable firewalld (firewalld)
+  service: 
+    name: firewalld  
+    state: stopped
+    enabled: no
+  when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7") or (ansible_distribution == "RedHat" and ansible_distribution_major_version == "7")
+
+- name: Disable iptables (iptables)
+  service: 
+    name: iptables 
+    state: stopped 
+    enabled: no
+  when: (ansible_distribution == "CentOS" and ansible_distribution_major_version == "6") or (ansible_distribution == "RedHat" and ansible_distribution_major_version == "6")
+
+- name: Change kernel parameters
+  sysctl: 
+    name: "{{ item.key }}" 
+    value: "{{ item.value }}" 
+    state: present
+  with_dict: "{{ kernel_params }}"
+  when: kernel_change
+
+- name: Add groups
+  group:
+    name: "{{ dstage_user }}"
+    state: present
+    gid: 1000
+
+#- name: encrypt password
+#  shell: python -c 'import crypt; print crypt.crypt("{{ dsadm_pass }}", "$1$SomeSalt$")'
+#  register: encrypted_dsadm_pass
+# Use encrypted pass from secrets instead
+#- name: print encrypted pass
+#  debug:
+#    msg: "Encrypted password is {{ encrypted_dsadm_pass }}" 
+
+- name: Add the user dsadm
+  user:
+    name: "{{ dsadm_user }}"
+    shell: /bin/bash
+    groups: dstage
+    uid: 1000
+    append: yes
+    password: "{{ encrypted_dsadm_pass }}"
+
+- name: set PAM limits
+  pam_limits:
+    domain:     "{{ item.domain }}"
+    value:      "{{ item.value }}"
+    limit_type: "{{ item.limit_type }}"
+    limit_item: "{{ item.limit_item }}"
+  with_items: "{{ pam_limits_values }}"
+  when: pam_limits_change
+  
+- include: oracle_user.yml
+  when: install_oracle_client 
+
+- include: oracle_install.yml
+  become: yes
+  become_user: "{{ oracle_user }}"
+  when: install_oracle_client
+
+
+
+
+
+

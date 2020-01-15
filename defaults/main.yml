@@ -1,0 +1,114 @@
+---
+
+
+#Default oracle user 
+
+#REQUIRED VALUES 
+#dsadm_pass
+
+#REQUIRED WITH ORACLE INSTALL 
+#oracle_client_installer_url
+
+
+dsadm_user: dsadm
+dstage_user: dstage
+
+
+
+package_list:
+  - "selinux-policy"
+  - "libXp.x86_64"
+  - "libXp.i686"
+  - "libXmu.x86_64"
+  - "libXmu.i686"
+  - "libXtst.i686"
+  - "compat-libstdc++-33.x86_64"
+  - "compat-libstdc++-33.i686"
+  - "glibc.x86_64"
+  - "glibc.i686"
+  - "libgcc.x86_64"
+  - "libgcc.i686"
+  - "pam.x86_64"
+  - "pam.i686"
+  - "ed"
+  - "gcc"
+  - "libaio"
+  - "libaio-devel"
+  - "elfutils-libelf-devel"
+  - "libstdc++-devel"
+  - "glibc-devel"
+  - "gcc-c++"
+  - "unzip"
+  - "xauth"
+  - "vi"
+  - "vim"
+  - "libXp-1.0.2-2.1.el7.x86_64"
+  - "libXau-1.0.8-2.1.el7.x86_64"
+  - "bc"
+  - "net-tools"
+  - "lsof"
+  - "unzip"
+  - "compat-libcap1"
+  - "gcc-c++"
+  - "libaio-devel"
+  - "libaio.i686"
+  - "libaio-devel.i686"
+  - "elfutils" 
+
+kernel_change: yes
+
+kernel_params: 
+  kernel.msgmax: 8192
+  kernel.msgmnb: 16384
+  kernel.shmmax: 307200000
+  kernel.shmmni: 2000
+  kernel.shmall: 2511724800
+  kernel.sem: "250 128000 32 1024"
+  fs.file-max: 65536
+#use the smaller value of 837241600 if the following conditions apply:
+#the computer has only the minimum memory requirement of 4 gb.
+#the computer does not have the metadata repository with db2 installed.
+#the page size is 4096.
+
+
+pam_limits_change: yes
+
+pam_limits_values:
+  - { domain: '*',      limit_type: 'soft', limit_item: 'nofile',  value: 16348 }
+  - { domain: '*',      limit_type: 'hard', limit_item: 'nofile',  value: 65536 }
+  - { domain: 'dsadm', limit_type: '-', limit_item: 'nofile',  value: 65536 }
+  - { domain: 'dsadm', limit_type: '-', limit_item: 'nproc',   value: 16384 }
+
+
+install_oracle_client: yes
+
+install_dir: /tmp/dbclient
+run_installer: /client/runInstaller
+
+
+
+oracle_pam_limits_change: yes
+oracle_pam_limits_values:
+  - { domain: 'oracle', limit_type: 'hard', limit_item: 'nofile',  value: 65536 }
+  - { domain: 'oracle', limit_type: 'soft', limit_item: 'nproc',   value: 2048 }
+  - { domain: 'oracle', limit_type: 'hard', limit_item: 'nproc',   value: 16384 }
+  - { domain: 'oracle', limit_type: 'soft', limit_item: 'memlock', value: 1048576 }
+  - { domain: 'oracle', limit_type: 'hard', limit_item: 'memlock', value: 1048576 }
+  - { domain: 'oracle', limit_type: 'soft', limit_item: 'stack',   value: 10240 }
+
+
+oracle_user: oracle
+oracle_group: oinstall
+response_file_version: "/oracle/install/rspfmt_clientinstall_response_schema_v12.2.0"
+unix_group_name: "{{ oracle_group }}"
+oracle_base: "/opt/oracle"
+oracle_home: "{{ oracle_base }}/product/12.2.0/client_1"
+inventory_location: "{{ oracle_base }}/oraInventory"
+
+oracle_install_type: "Runtime"
+
+oracle_soft_no_file: 4096
+oracle_hard_no_file: 65536
+oracle_soft_nproc: 2047
+oracle_hard_nproc: 16384
+
